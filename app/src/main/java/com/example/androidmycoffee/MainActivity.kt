@@ -4,47 +4,21 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.androidmycoffee.ui.theme.AndroidmycoffeeTheme
+import androidx.lifecycle.ViewModelProvider
+import com.example.androidmycoffee.presentation.screen.CoffeeScreen
+import com.example.androidmycoffee.presentation.viewmodel.CoffeeViewModel
+import com.example.androidmycoffee.presentation.viewmodel.CoffeeViewModelFactory
 
 class MainActivity : ComponentActivity() {
+    private lateinit var viewModel: CoffeeViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val appContainer = (application as CoffeeApplication).appContainer
+        val factory = CoffeeViewModelFactory(appContainer.getCoffeeListUseCase)
+        viewModel = ViewModelProvider(this, factory)[CoffeeViewModel::class.java]
         setContent {
-            AndroidmycoffeeTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    GreeTing(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding),
-                    )
-                }
-            }
+            CoffeeScreen(viewModel)
         }
-    }
-}
-
-@Composable
-fun GreeTing(
-    name: String,
-    modifier: Modifier = Modifier,
-) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier,
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    AndroidmycoffeeTheme {
-        GreeTing("Android")
     }
 }
