@@ -1,7 +1,7 @@
 package com.example.androidmycoffee.domain.repository
 
-import com.example.androidmycoffee.domain.model.Coffee
+import com.example.androidmycoffee.data.datasource.local.entity.CoffeeEntity
 
 interface CoffeeRepository {
-    suspend fun getCoffeeList(): List<Coffee>
+    suspend fun getCoffeeList(): List<CoffeeEntity>
 }
