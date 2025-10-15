@@ -64,4 +64,7 @@ dependencies {
     implementation(libs.androidx.room.ktx.v261)
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
+
+    // nav
+    implementation(libs.androidx.navigation.compose.v282)
 }
