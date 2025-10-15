@@ -1,5 +1,7 @@
 package com.example.androidmycoffee.presentation.screen
 
+import android.annotation.SuppressLint
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,44 +24,52 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.androidmycoffee.domain.model.Coffee
+import com.example.androidmycoffee.presentation.ad.BannerAdView
 import com.example.androidmycoffee.presentation.viewmodel.CoffeeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CoffeeScreen(viewModel: CoffeeViewModel) {
+fun CoffeeScreen(viewModel: CoffeeViewModel, onNavigate: (String) -> Unit) {
     val state by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("☕ Coffee Menu") }) },
-    ) { padding ->
-        Box(Modifier.padding(padding)) {
+        bottomBar = { BannerAdView() },
+    ) { innerPadding ->
+        Box(Modifier.padding(innerPadding)) {
             if (state.isLoading) {
                 CircularProgressIndicator(Modifier.align(Alignment.Center))
             } else {
-                CoffeeList(state.coffees)
+                CoffeeList(state.coffees, onNavigate)
             }
         }
     }
 }
 
 @Composable
-fun CoffeeList(coffees: List<Coffee>) {
+fun CoffeeList(coffees: List<Coffee>, onNavigate: (String) -> Unit) {
     LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         items(coffees) { coffee ->
-            CoffeeItem(coffee)
+            CoffeeItem(coffee, onNavigate)
         }
     }
 }
 
+@SuppressLint("DefaultLocale")
 @Composable
-fun CoffeeItem(coffee: Coffee) {
+fun CoffeeItem(coffee: Coffee, onNavigate: (String) -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+        modifier = Modifier.fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .clickable { onNavigate("coffee_detail") },
         elevation = CardDefaults.cardElevation(4.dp),
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp),
+        ) {
             Text(text = coffee.name, style = MaterialTheme.typography.titleMedium)
-            val priceText = coffee.price?.let { "Price: $" + String.format("%.2f", it) } ?: "Price: N/A"
+            val priceText = coffee.price.let { "Price: $" + String.format("%.2f", it) }
             Text(text = priceText)
         }
     }

@@ -5,7 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.lifecycle.ViewModelProvider
-import com.example.androidmycoffee.presentation.screen.CoffeeScreen
+import androidx.navigation.compose.rememberNavController
+import com.example.androidmycoffee.presentation.navigation.AppNavGraph
 import com.example.androidmycoffee.presentation.viewmodel.CoffeeViewModel
 import com.example.androidmycoffee.presentation.viewmodel.CoffeeViewModelFactory
 
@@ -18,7 +19,9 @@ class MainActivity : ComponentActivity() {
         val factory = CoffeeViewModelFactory(appContainer.getCoffeeListUseCase)
         viewModel = ViewModelProvider(this, factory)[CoffeeViewModel::class.java]
         setContent {
-            CoffeeScreen(viewModel)
+            val navController = rememberNavController()
+            val appContainer = (application as CoffeeApplication).appContainer
+            AppNavGraph(navController = navController, appContainer = appContainer)
         }
     }
 }
