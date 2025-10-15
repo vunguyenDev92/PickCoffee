@@ -69,7 +69,7 @@ fun CoffeeItem(coffee: Coffee, onNavigate: (String) -> Unit) {
                 .padding(16.dp),
         ) {
             Text(text = coffee.name, style = MaterialTheme.typography.titleMedium)
-            val priceText = coffee.price.let { "Price: $" + String.format("%.2f", it) }
+            val priceText = coffee.price?.let { "Price: $" + String.format("%.2f", it) } ?: "Price: N/A"
             Text(text = priceText)
         }
     }
