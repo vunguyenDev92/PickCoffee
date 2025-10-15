@@ -5,12 +5,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.navigation.compose.rememberNavController
+import com.example.androidmycoffee.presentation.ad.InterstitialAdManager
 import com.example.androidmycoffee.presentation.navigation.AppNavGraph
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        InterstitialAdManager.loadAd(this)
         val appContainer = (application as CoffeeApplication).appContainer
         setContent {
             val navController = rememberNavController()

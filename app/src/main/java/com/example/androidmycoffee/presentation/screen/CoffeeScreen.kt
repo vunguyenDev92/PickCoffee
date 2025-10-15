@@ -1,6 +1,7 @@
 package com.example.androidmycoffee.presentation.screen
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,9 +23,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.androidmycoffee.domain.model.Coffee
 import com.example.androidmycoffee.presentation.ad.BannerAdView
+import com.example.androidmycoffee.presentation.ad.InterstitialAdManager
 import com.example.androidmycoffee.presentation.viewmodel.CoffeeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,13 +58,18 @@ fun CoffeeList(coffees: List<Coffee>, onNavigate: (String) -> Unit) {
     }
 }
 
-@SuppressLint("DefaultLocale")
+@SuppressLint("DefaultLocale", "ContextCastToActivity")
 @Composable
 fun CoffeeItem(coffee: Coffee, onNavigate: (String) -> Unit) {
+    val activity = LocalContext.current as Activity
     Card(
         modifier = Modifier.fillMaxWidth()
             .padding(vertical = 8.dp)
-            .clickable { onNavigate("coffee_detail") },
+            .clickable {
+                InterstitialAdManager.showInterstitial(activity) {
+                    onNavigate("coffee_detail")
+                }
+            },
         elevation = CardDefaults.cardElevation(4.dp),
     ) {
         Column(
