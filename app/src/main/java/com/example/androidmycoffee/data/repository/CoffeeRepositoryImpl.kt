@@ -9,4 +9,8 @@ class CoffeeRepositoryImpl(private val coffeeLocalDataSource: CoffeeLocalDataSou
     override suspend fun getCoffeeList(): List<Coffee> {
         return coffeeLocalDataSource.getAllCoffees().map { it.toDomain() }
     }
+    
+    override suspend fun getCoffeeById(id: Int): Coffee? {
+        return coffeeLocalDataSource.getCoffeeById(id)?.toDomain()
+    }
 }

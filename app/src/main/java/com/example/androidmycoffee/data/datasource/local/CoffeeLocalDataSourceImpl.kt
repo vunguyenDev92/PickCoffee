@@ -11,4 +11,8 @@ class CoffeeLocalDataSourceImpl(private val coffeeDao: CoffeeDao) : CoffeeLocalD
     override suspend fun insertCoffees(list: List<CoffeeEntity>) {
         return coffeeDao.insertAll(list)
     }
+    
+    override suspend fun getCoffeeById(id: Int): CoffeeEntity? {
+        return coffeeDao.getById(id)
+    }
 }
