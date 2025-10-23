@@ -10,10 +10,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -32,42 +36,60 @@ import com.example.androidmycoffee.presentation.viewmodel.CoffeeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CoffeeScreen(viewModel: CoffeeViewModel, onNavigate: (String) -> Unit) {
+fun CoffeeScreen(
+    viewModel: CoffeeViewModel,
+    onNavigate: (String) -> Unit,
+    onNavigateToDetail: (Coffee) -> Unit,
+    onNavigateToCart: () -> Unit,
+) {
     val state by viewModel.uiState.collectAsState()
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("☕ Coffee Menu") }) },
+        topBar = {
+            TopAppBar(
+                title = { Text("☕ Coffee Menu") },
+                actions = {
+                    IconButton(onClick = { onNavigateToCart() }) {
+                        Icon(
+                            imageVector = Icons.Default.ShoppingCart,
+                            contentDescription = "Cart",
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        )
+                    }
+                },
+            )
+        },
         bottomBar = { BannerAdView() },
     ) { innerPadding ->
         Box(Modifier.padding(innerPadding)) {
             if (state.isLoading) {
                 CircularProgressIndicator(Modifier.align(Alignment.Center))
             } else {
-                CoffeeList(state.coffees, onNavigate)
+                CoffeeList(state.coffees, onNavigateToDetail)
             }
         }
     }
 }
 
 @Composable
-fun CoffeeList(coffees: List<Coffee>, onNavigate: (String) -> Unit) {
+fun CoffeeList(coffees: List<Coffee>, onNavigateToDetail: (Coffee) -> Unit) {
     LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         items(coffees) { coffee ->
-            CoffeeItem(coffee, onNavigate)
+            CoffeeItem(coffee, onNavigateToDetail)
         }
     }
 }
 
 @SuppressLint("DefaultLocale", "ContextCastToActivity")
 @Composable
-fun CoffeeItem(coffee: Coffee, onNavigate: (String) -> Unit) {
+fun CoffeeItem(coffee: Coffee, onNavigateToDetail: (Coffee) -> Unit) {
     val activity = LocalContext.current as Activity
     Card(
         modifier = Modifier.fillMaxWidth()
             .padding(vertical = 8.dp)
             .clickable {
                 InterstitialAdManager.showInterstitial(activity) {
-                    onNavigate("coffee_detail")
+                    onNavigateToDetail(coffee)
                 }
             },
         elevation = CardDefaults.cardElevation(4.dp),

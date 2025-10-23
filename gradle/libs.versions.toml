@@ -8,15 +8,14 @@ espressoCore = "3.7.0"
 lifecycleRuntimeKtx = "2.9.1"
 activityCompose = "1.10.1"
 composeBom = "2024.09.00"
-navigationCompose = "2.9.5"
 navigationComposeVersion = "2.8.2"
 playServicesAds = "24.7.0"
 roomKtxVersion = "2.6.1"
 roomRuntime = "2.8.2"
 ksp = "2.0.21-1.0.27"
+lottieCompose = "6.1.0"
 
 [libraries]
-androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-navigation-compose-v282 = { module = "androidx.navigation:navigation-compose", version.ref = "navigationComposeVersion" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -36,6 +35,7 @@ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-man
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 play-services-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "playServicesAds" }
+lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottieCompose" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -4,4 +4,5 @@ import com.example.androidmycoffee.domain.model.Coffee
 
 interface CoffeeRepository {
     suspend fun getCoffeeList(): List<Coffee>
+    suspend fun getCoffeeById(id: Int): Coffee?
 }
