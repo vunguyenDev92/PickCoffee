@@ -74,7 +74,7 @@ class BillingManager(
 
     fun launchPurchaseFlow(activity: Activity, productId: String) {
         Log.d("BillingManager", "launchPurchaseFlow called with productId: $productId")
-
+        _purchaseState.value = PurchaseState.Purchasing(productId)
         if (billingClient?.isReady == false) {
             Log.e("BillingManager", "BillingClient is not ready.")
             return
@@ -102,9 +102,9 @@ class BillingManager(
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                     val productDetailsList = queryProductDetailsResult.productDetailsList
 
-                    Log.d("BillingManager", "Product details list size: ${productDetailsList?.size ?: 0}")
+                    Log.d("BillingManager", "Product details list size: ${productDetailsList.size}")
 
-                    if (productDetailsList != null && productDetailsList.isNotEmpty()) {
+                    if (productDetailsList.isNotEmpty()) {
                         val productDetails = productDetailsList[0]
                         Log.d("BillingManager", "Product found: ${productDetails.productId}")
 
@@ -128,7 +128,7 @@ class BillingManager(
                     }
 
                     val unfetchedProductList = queryProductDetailsResult.unfetchedProductList
-                    if (unfetchedProductList != null && unfetchedProductList.isNotEmpty()) {
+                    if (unfetchedProductList.isNotEmpty()) {
                         for (unfetchedProduct in unfetchedProductList) {
                             Log.w("BillingManager", "UnFetched product: ${unfetchedProduct.productId}, Type: ${unfetchedProduct.productType}")
                         }
@@ -200,4 +200,6 @@ sealed class PurchaseState {
     object Loading : PurchaseState()
     object NotPurchased : PurchaseState()
     object Purchased : PurchaseState()
+    data class Purchasing(val productId: String) : PurchaseState()
+    data class Error(val message: String) : PurchaseState()
 }
