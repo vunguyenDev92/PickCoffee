@@ -16,7 +16,7 @@ class AppContainer(context: Context) {
     private val localDataSource = CoffeeLocalDataSourceImpl(db.coffeeDao())
     private val coffeeRepository = CoffeeRepositoryImpl(localDataSource)
     val billingManager = BillingManager(context).apply { initialize() }
-    val cartRepository = CartRepositoryImpl()
+    val cartRepository = CartRepositoryImpl(billingManager)
     val getCoffeeListUseCase = GetCoffeeListUseCase(coffeeRepository)
     val getCoffeeByIdUseCase = GetCoffeeByIdUseCase(coffeeRepository)
     val addToCartUseCase = AddToCartUseCase(cartRepository)

@@ -183,6 +183,9 @@ fun PremiumPurchaseScreen(
                         Text("Purchase Premium - $4.99", color = Color.White, fontSize = 18.sp)
                     }
                 }
+
+                is PurchaseState.Error -> {}
+                is PurchaseState.Purchasing -> {}
             }
 
             // Footer
