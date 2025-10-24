@@ -1,5 +1,7 @@
 package com.example.androidmycoffee.presentation.screen
 
+import android.annotation.SuppressLint
+import android.app.Activity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,9 +20,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,19 +38,26 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.androidmycoffee.R
+import com.example.androidmycoffee.data.billing.BillingManager
+import com.example.androidmycoffee.data.billing.PurchaseState
 
+@SuppressLint("ContextCastToActivity")
 @Composable
 fun PremiumPurchaseScreen(
-    onContinue: (String) -> Unit,
+    billingManager: BillingManager,
+    onContinue: () -> Unit,
     onClose: () -> Unit = {},
 ) {
     var selectedPlan by remember { mutableStateOf("yearly") }
+    val context = LocalContext.current as Activity
+    val purchaseState by billingManager.purchaseState.collectAsState()
 
     Box(
         modifier = Modifier
@@ -107,43 +121,68 @@ fun PremiumPurchaseScreen(
                 )
             }
 
-            Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+            Card(
                 modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
             ) {
-                PlanOption(
-                    title = "Weekly",
-                    subtitle = "Cancel Anytime",
-                    price = "$13.99/week",
-                    isSelected = selectedPlan == "weekly",
-                    onClick = { selectedPlan = "weekly" },
-                )
-                PlanOption(
-                    title = "Monthly",
-                    subtitle = "Cancel Anytime",
-                    price = "$13.99/month",
-                    isSelected = selectedPlan == "monthly",
-                    onClick = { selectedPlan = "monthly" },
-                )
-                PlanOption(
-                    title = "Yearly",
-                    subtitle = "Cancel Anytime",
-                    price = "$23.99/year",
-                    isSelected = selectedPlan == "yearly",
-                    onClick = { selectedPlan = "yearly" },
-                )
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(
+                        text = "Premium Plan",
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                    Text(
+                        text = "$4.99",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                    Text(
+                        text = "One-time purchase",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
             }
+            Spacer(modifier = Modifier.height(24.dp))
 
-            // Continue button
-            Button(
-                onClick = { onContinue(selectedPlan) },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF1744)),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .clip(RoundedCornerShape(12.dp)),
-            ) {
-                Text("Continue", color = Color.White, fontSize = 18.sp)
+            when (purchaseState) {
+                is PurchaseState.Loading -> {
+                    CircularProgressIndicator(color = Color.White)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Loading...", color = Color.White)
+                }
+                is PurchaseState.Purchased -> {
+                    Text("Premium Activated!", color = Color.White, fontSize = 18.sp)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(
+                        onClick = onContinue,
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .clip(RoundedCornerShape(12.dp)),
+                    ) {
+                        Text("Continue", color = Color.White, fontSize = 18.sp)
+                    }
+                }
+                is PurchaseState.NotPurchased -> {
+                    Button(
+                        onClick = {
+                            billingManager.launchPurchaseFlow(
+                                context,
+                                BillingManager.PREMIUM_PRODUCT_ID,
+                            )
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF1744)),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .clip(RoundedCornerShape(12.dp)),
+                    ) {
+                        Text("Purchase Premium - $4.99", color = Color.White, fontSize = 18.sp)
+                    }
+                }
             }
 
             // Footer
@@ -162,6 +201,9 @@ fun PremiumPurchaseScreen(
                     "Restore",
                     color = Color.White.copy(alpha = 0.6f),
                     fontSize = 12.sp,
+                    modifier = Modifier.clickable {
+                        billingManager.restorePurchases()
+                    },
                 )
                 Text(
                     "Privacy Policy",

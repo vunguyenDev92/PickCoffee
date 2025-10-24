@@ -70,4 +70,8 @@ dependencies {
 
     // lottie
     implementation(libs.lottie.compose)
+
+    // in app purchase
+    implementation(libs.billing.ktx)
+    implementation(libs.billing)
 }
