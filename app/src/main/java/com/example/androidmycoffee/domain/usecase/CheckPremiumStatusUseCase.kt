@@ -1,11 +1,16 @@
 package com.example.androidmycoffee.domain.usecase
 
-class CheckPremiumStatusUseCase {
-    private var premium = false
+import com.example.androidmycoffee.data.billing.BillingManager
+import com.example.androidmycoffee.data.billing.PurchaseState
 
-    suspend operator fun invoke(): Boolean = premium
+class CheckPremiumStatusUseCase(
+    private val billingManager: BillingManager,
+) {
+    operator fun invoke(): Boolean {
+        return billingManager.purchaseState.value is PurchaseState.Purchased
+    }
 
-    fun setPremium(value: Boolean) {
-        premium = value
+    suspend fun getPremiumStatus(): Boolean {
+        return invoke()
     }
 }
