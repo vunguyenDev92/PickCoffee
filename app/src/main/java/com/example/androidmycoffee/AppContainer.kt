@@ -1,6 +1,7 @@
 package com.example.androidmycoffee
 
 import android.content.Context
+import com.example.androidmycoffee.data.billing.BillingManager
 import com.example.androidmycoffee.data.datasource.local.CoffeeLocalDataSourceImpl
 import com.example.androidmycoffee.data.datasource.local.database.AppDatabase
 import com.example.androidmycoffee.data.repository.CartRepositoryImpl
@@ -14,9 +15,10 @@ class AppContainer(context: Context) {
     private val db = AppDatabase.getInstance(context)
     private val localDataSource = CoffeeLocalDataSourceImpl(db.coffeeDao())
     private val coffeeRepository = CoffeeRepositoryImpl(localDataSource)
+    val billingManager = BillingManager(context).apply { initialize() }
     val cartRepository = CartRepositoryImpl()
     val getCoffeeListUseCase = GetCoffeeListUseCase(coffeeRepository)
     val getCoffeeByIdUseCase = GetCoffeeByIdUseCase(coffeeRepository)
     val addToCartUseCase = AddToCartUseCase(cartRepository)
-    val checkPremiumStatusUseCase = CheckPremiumStatusUseCase()
+    val checkPremiumStatusUseCase = CheckPremiumStatusUseCase(billingManager)
 }

@@ -108,6 +108,7 @@ fun AppNavGraph(
         }
         composable(Screen.Premium.route) {
             PremiumPurchaseScreen(
+                billingManager = appContainer.billingManager,
                 onContinue = {
                     navController.navigateUp()
                 },
