@@ -87,4 +87,8 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging.interceptor)
     implementation(libs.gson)
+
+    implementation(libs.play.services.auth)
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.kotlinx.coroutines.play.services)
 }
