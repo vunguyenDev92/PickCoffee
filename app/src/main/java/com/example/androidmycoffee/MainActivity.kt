@@ -13,9 +13,13 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // Load ads
         InterstitialAdManager.loadAd(this)
         RewardedAdManager.loadAd(this)
+
         val appContainer = (application as CoffeeApplication).appContainer
+
         setContent {
             val navController = rememberNavController()
             AppNavGraph(navController = navController, appContainer = appContainer)
