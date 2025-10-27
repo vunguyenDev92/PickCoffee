@@ -9,8 +9,4 @@ class CheckPremiumStatusUseCase(
     operator fun invoke(): Boolean {
         return billingManager.purchaseState.value is PurchaseState.Purchased
     }
-
-    suspend fun getPremiumStatus(): Boolean {
-        return invoke()
-    }
 }

@@ -37,7 +37,6 @@ class CartViewModel(
             // Add item to cart
             val result = addToCartUseCase(item)
             if (result.isSuccess) {
-                // Reload cart items from repository
                 _cartItems.value = cartRepository.getCartItems()
                 _event.value = CartEvent.Added
             } else {
