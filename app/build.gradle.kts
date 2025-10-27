@@ -5,6 +5,18 @@ plugins {
     alias(libs.plugins.google.devtools.ksp)
 }
 
+// Load local.properties
+val localProperties = java.util.Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.inputStream().use { localProperties.load(it) }
+}
+
+// Get API keys from local.properties with fallback to test IDs
+fun getLocalProperty(key: String, defaultValue: String = ""): String {
+    return localProperties.getProperty(key) ?: defaultValue
+}
+
 android {
     namespace = "com.example.androidmycoffee"
     compileSdk = 36
@@ -17,6 +29,17 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Add API keys to BuildConfig
+        buildConfigField("String", "FIREBASE_WEB_CLIENT_ID", "\"${getLocalProperty("FIREBASE_WEB_CLIENT_ID", "")}\"")
+        buildConfigField("String", "ADMOB_APP_ID", "\"${getLocalProperty("ADMOB_APP_ID", "ca-app-pub-3940256099942544~3347511713")}\"")
+        buildConfigField("String", "ADMOB_APP_OPEN_AD_UNIT_ID", "\"${getLocalProperty("ADMOB_APP_OPEN_AD_UNIT_ID", "ca-app-pub-3940256099942544/9257395921")}\"")
+        buildConfigField("String", "ADMOB_INTERSTITIAL_AD_UNIT_ID", "\"${getLocalProperty("ADMOB_INTERSTITIAL_AD_UNIT_ID", "ca-app-pub-3940256099942544/1033173712")}\"")
+        buildConfigField("String", "ADMOB_REWARDED_AD_UNIT_ID", "\"${getLocalProperty("ADMOB_REWARDED_AD_UNIT_ID", "ca-app-pub-3940256099942544/5224354917")}\"")
+        buildConfigField("String", "ADMOB_BANNER_AD_UNIT_ID", "\"${getLocalProperty("ADMOB_BANNER_AD_UNIT_ID", "ca-app-pub-3940256099942544/9214589741")}\"")
+
+        // Add manifest placeholders for AdMob App ID
+        manifestPlaceholders["ADMOB_APP_ID"] = getLocalProperty("ADMOB_APP_ID", "ca-app-pub-3940256099942544~3347511713")
     }
 
     buildTypes {
@@ -37,6 +60,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 

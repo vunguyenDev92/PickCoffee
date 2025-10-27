@@ -17,13 +17,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
+import com.example.androidmycoffee.BuildConfig
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
-
-private const val BANNER_AD_UNIT_ID = "ca-app-pub-3940256099942544/9214589741"
 
 @Composable
 fun BannerAdView() {
@@ -32,7 +31,7 @@ fun BannerAdView() {
     val adSize by remember { mutableStateOf(getAdSize(context as Activity)) }
 
     LaunchedEffect(Unit) {
-        adView.adUnitId = BANNER_AD_UNIT_ID
+        adView.adUnitId = BuildConfig.ADMOB_BANNER_AD_UNIT_ID
         adView.setAdSize(adSize)
 
         adView.adListener = object : AdListener() {

@@ -2,14 +2,13 @@ package com.example.androidmycoffee.presentation.ad
 
 import android.app.Activity
 import android.util.Log
+import com.example.androidmycoffee.BuildConfig
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
-
-private const val INTER_AD_UNIT_ID = "ca-app-pub-3940256099942544/1033173712"
 
 object InterstitialAdManager {
     private var interstitialAd: InterstitialAd? = null
@@ -23,7 +22,7 @@ object InterstitialAdManager {
         val adRequest = AdRequest.Builder().build()
         InterstitialAd.load(
             activity,
-            INTER_AD_UNIT_ID,
+            BuildConfig.ADMOB_INTERSTITIAL_AD_UNIT_ID,
             adRequest,
             object : InterstitialAdLoadCallback() {
                 override fun onAdLoaded(ad: InterstitialAd) {

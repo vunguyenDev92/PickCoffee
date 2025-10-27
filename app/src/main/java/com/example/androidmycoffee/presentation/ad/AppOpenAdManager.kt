@@ -3,6 +3,7 @@ package com.example.androidmycoffee.presentation.ad
 import android.app.Activity
 import android.app.Application
 import android.util.Log
+import com.example.androidmycoffee.BuildConfig
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
@@ -19,7 +20,6 @@ class AppOpenAdManager(private val application: Application) {
     private var loadTime: Long = 0
 
     companion object {
-        private const val AD_UNIT_ID = "ca-app-pub-3940256099942544/9257395921"
         private const val TAG = "AppOpenAd"
     }
 
@@ -27,7 +27,7 @@ class AppOpenAdManager(private val application: Application) {
         val adRequest = AdRequest.Builder().build()
         AppOpenAd.load(
             application,
-            "AD_UNIT_ID",
+            BuildConfig.ADMOB_APP_OPEN_AD_UNIT_ID,
             AdRequest.Builder().build(),
             object : AppOpenAdLoadCallback() {
                 override fun onAdLoaded(ad: AppOpenAd) {
