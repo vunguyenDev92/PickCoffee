@@ -1,169 +1,180 @@
-// presentation/screen/LoginScreen.kt
 package com.example.androidmycoffee.presentation.screen
 
+import android.annotation.SuppressLint
 import android.app.Activity
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.airbnb.lottie.compose.*
-import com.example.androidmycoffee.R
-import com.example.androidmycoffee.data.auth.AuthResult
-import com.example.androidmycoffee.presentation.viewmodel.AuthViewModel
+import com.example.androidmycoffee.data.auth.FirebaseAuthDataSource
+import com.example.androidmycoffee.domain.model.AuthState
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.common.api.ApiException
+import kotlinx.coroutines.launch
 
+@SuppressLint("ContextCastToActivity")
 @Composable
-fun LoginScreen(
-    viewModel: AuthViewModel,
-    onLoginSuccess: () -> Unit,
+fun AuthScreen(
+    authDataSource: FirebaseAuthDataSource,
+    onSignInSuccess: () -> Unit,
 ) {
-    val context = LocalContext.current
-    val authState by viewModel.authState.collectAsState()
+    val activity = LocalContext.current as Activity
+    val authState by authDataSource.authState.collectAsState()
+    var showError by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
 
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartIntentSenderForResult(),
+    val googleSignInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult(),
     ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            result.data?.let { intent ->
-                viewModel.signInWithIntent(intent)
+        try {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            val account = task.getResult(ApiException::class.java)
+
+            account.idToken?.let { idToken ->
+                scope.launch {
+                    val signInResult = authDataSource.signInWithGoogle(idToken)
+                    if (signInResult.isSuccess) {
+                        onSignInSuccess()
+                    } else {
+                        showError = signInResult.exceptionOrNull()?.message ?: "Sign in failed"
+                    }
+                }
             }
+        } catch (e: ApiException) {
+            showError = "Google sign in failed: ${e.message}"
         }
     }
 
-    LaunchedEffect(authState) {
-        when (authState) {
-            is AuthResult.Success -> {
-                Toast.makeText(context, "Login successful!", Toast.LENGTH_SHORT).show()
-                onLoginSuccess()
-            }
-            is AuthResult.Error -> {
-                val message = (authState as AuthResult.Error).message
-                Toast.makeText(context, "Login failed: $message", Toast.LENGTH_SHORT).show()
-            }
-            else -> {}
-        }
+    fun startGoogleSignIn() {
+        val googleSignInClient = authDataSource.getGoogleSignInClient()
+        val signInIntent = googleSignInClient.signInIntent
+        googleSignInLauncher.launch(signInIntent)
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .background(
+                color = MaterialTheme.colorScheme.background,
+            ),
         contentAlignment = Alignment.Center,
     ) {
         Column(
+            modifier = Modifier
+                .fillMaxWidth(0.85f)
+                .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
-            // Coffee Animation
-            val composition by rememberLottieComposition(
-                LottieCompositionSpec.RawRes(R.raw.coffee),
-            )
-            val progress by animateLottieCompositionAsState(
-                composition = composition,
-                iterations = LottieConstants.IterateForever,
-            )
-
-            LottieAnimation(
-                composition = composition,
-                progress = { progress },
-                modifier = Modifier.size(200.dp),
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Title
             Text(
-                text = "Welcome to",
-                fontSize = 24.sp,
-                color = Color.Gray,
-            )
-            Text(
-                text = "My Coffee Shop",
-                fontSize = 32.sp,
+                text = "☕ Welcome to Coffee Shop",
+                fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
             Text(
-                text = "Sign in to order your favorite coffee",
-                fontSize = 16.sp,
-                color = Color.Gray,
-                textAlign = TextAlign.Center,
+                text = "Sign in to enjoy your favorite coffee and exclusive features",
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 8.dp),
             )
 
-            Spacer(modifier = Modifier.height(48.dp))
+            when (authState) {
+                is AuthState.Loading -> {
+                    CircularProgressIndicator()
+                    Text("Signing in...", fontSize = 14.sp)
+                }
 
-            // Google Sign-In Button
-            Button(
-                onClick = {
-                    viewModel.signIn { intentSender ->
-                        launcher.launch(
-                            IntentSenderRequest.Builder(intentSender).build(),
+                is AuthState.Authenticated -> {
+                    LaunchedEffect(Unit) {
+                        onSignInSuccess()
+                    }
+                }
+
+                is AuthState.NotAuthenticated -> {
+                    Button(
+                        onClick = { startGoogleSignIn() },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .clip(RoundedCornerShape(12.dp)),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.White,
+                        ),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AccountCircle,
+                            contentDescription = "Google",
+                            tint = Color.Black,
+                            modifier = Modifier.padding(end = 8.dp),
+                        )
+                        Text(
+                            "Sign in with Google",
+                            color = Color.Black,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 16.sp,
                         )
                     }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White,
-                    contentColor = Color.Black,
-                ),
-                elevation = ButtonDefaults.buttonElevation(
-                    defaultElevation = 2.dp,
-                ),
-                enabled = authState !is AuthResult.Loading,
-            ) {
-                if (authState is AuthResult.Loading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.primary,
+                }
+
+                is AuthState.Error -> {
+                    Text(
+                        "Error: ${(authState as AuthState.Error).message}",
+                        color = MaterialTheme.colorScheme.error,
+                        fontSize = 14.sp,
                     )
-                } else {
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
+
+                    Button(
+                        onClick = { startGoogleSignIn() },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .clip(RoundedCornerShape(12.dp)),
                     ) {
-                        // Google Icon (you need to add this drawable)
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_google),
-                            contentDescription = "Google",
-                            modifier = Modifier.size(24.dp),
-                            tint = Color.Unspecified,
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(
-                            text = "Continue with Google",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium,
-                        )
+                        Text("Try Again")
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Skip button (for testing)
-            TextButton(
-                onClick = { /* TODO: Skip login for testing */ },
-                enabled = authState !is AuthResult.Loading,
-            ) {
-                Text("Continue without login")
+            if (showError != null) {
+                Text(
+                    text = showError ?: "",
+                    color = MaterialTheme.colorScheme.error,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                )
             }
         }
     }

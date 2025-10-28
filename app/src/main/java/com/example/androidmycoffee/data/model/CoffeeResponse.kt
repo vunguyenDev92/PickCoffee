@@ -1,4 +1,4 @@
-package com.example.androidmycoffee.data.datasource.remote.model
+package com.example.androidmycoffee.data.model
 
 import com.example.androidmycoffee.domain.model.Coffee
 import com.example.androidmycoffee.domain.model.TypeCoffee
@@ -25,7 +25,7 @@ data class CoffeeResponse(
     val imageUrl: String? = null,
 
     @SerializedName("isAvailable")
-    val isAvailable: Boolean = true
+    val isAvailable: Boolean = true,
 )
 
 fun CoffeeResponse.toDomain(): Coffee {
@@ -45,7 +45,7 @@ data class OrderRequest(
     val items: List<OrderItemRequest>,
 
     @SerializedName("totalPrice")
-    val totalPrice: Double
+    val totalPrice: Double,
 )
 
 data class OrderItemRequest(
@@ -59,7 +59,7 @@ data class OrderItemRequest(
     val quantity: Int,
 
     @SerializedName("price")
-    val price: Double
+    val price: Double,
 )
 
 data class OrderResponse(
@@ -82,7 +82,7 @@ data class OrderResponse(
     val createdAt: Long,
 
     @SerializedName("updatedAt")
-    val updatedAt: Long
+    val updatedAt: Long,
 )
 
 data class OrderItemResponse(
@@ -96,12 +96,12 @@ data class OrderItemResponse(
     val quantity: Int,
 
     @SerializedName("price")
-    val price: Double
+    val price: Double,
 )
 
 data class StatusUpdateRequest(
     @SerializedName("status")
-    val status: String
+    val status: String,
 )
 
 data class ApiResponse<T>(
@@ -112,5 +112,5 @@ data class ApiResponse<T>(
     val message: String? = null,
 
     @SerializedName("data")
-    val data: T? = null
+    val data: T? = null,
 )

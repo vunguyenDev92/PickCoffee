@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.devtools.ksp)
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -80,6 +81,8 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.storage)
+    implementation(libs.firebase.config.ktx)
+    implementation(libs.firebase.auth.ktx)
 
     // Retrofit
     implementation(libs.retrofit)
@@ -89,6 +92,7 @@ dependencies {
     implementation(libs.gson)
 
     implementation(libs.play.services.auth)
-    implementation(libs.firebase.auth.ktx)
     implementation(libs.kotlinx.coroutines.play.services)
+
+    implementation(libs.coil.compose)
 }
