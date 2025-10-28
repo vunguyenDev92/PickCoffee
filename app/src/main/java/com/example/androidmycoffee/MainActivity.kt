@@ -14,11 +14,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // Load ads
         InterstitialAdManager.loadAd(this)
         RewardedAdManager.loadAd(this)
 
         val appContainer = (application as CoffeeApplication).appContainer
+
+        appContainer.initializeAuth(this)
 
         setContent {
             val navController = rememberNavController()

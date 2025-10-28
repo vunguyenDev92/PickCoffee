@@ -6,23 +6,28 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.androidmycoffee.AppContainer
+import com.example.androidmycoffee.presentation.screen.AuthScreen
 import com.example.androidmycoffee.presentation.screen.CoffeeCartScreen
 import com.example.androidmycoffee.presentation.screen.CoffeeDetailScreen
 import com.example.androidmycoffee.presentation.screen.CoffeeScreen
 import com.example.androidmycoffee.presentation.screen.CoffeeSettingScreen
 import com.example.androidmycoffee.presentation.screen.PremiumPurchaseScreen
+import com.example.androidmycoffee.presentation.screen.ProfileScreen
 import com.example.androidmycoffee.presentation.screen.SplashScreen
+import com.example.androidmycoffee.presentation.viewmodel.AuthViewModel
 import com.example.androidmycoffee.presentation.viewmodel.CartViewModel
 import com.example.androidmycoffee.presentation.viewmodel.CoffeeViewModel
 import kotlinx.coroutines.runBlocking
 
 sealed class Screen(val route: String) {
+    object Auth : Screen("auth")
     object CoffeeList : Screen("coffee_list")
     object CoffeeDetail : Screen("coffee_detail")
     object Cart : Screen("cart")
     object Settings : Screen("settings")
     object Splash : Screen("splash")
     object Premium : Screen("premium")
+    object Profile : Screen("profile")
 }
 
 @Composable
@@ -30,6 +35,13 @@ fun AppNavGraph(
     navController: NavHostController,
     appContainer: AppContainer,
 ) {
+    val authViewModel = remember {
+        AuthViewModel(
+            appContainer.authDataSource,
+            appContainer.saveUserProfileUseCase,
+        )
+    }
+
     val cartViewModel = remember {
         CartViewModel(
             appContainer.addToCartUseCase,
@@ -37,25 +49,51 @@ fun AppNavGraph(
             appContainer.cartRepository,
         )
     }
+
+    val startDestination = if (authViewModel.isSignedIn()) {
+        Screen.CoffeeList.route
+    } else {
+        Screen.Splash.route
+    }
+
     NavHost(
         navController = navController,
-        startDestination = Screen.Splash.route,
+        startDestination = startDestination,
     ) {
         composable(Screen.Splash.route) {
             SplashScreen(
                 onNavigate = {
-                    navController.navigate(Screen.CoffeeList.route) {
-                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    if (authViewModel.isSignedIn()) {
+                        navController.navigate(Screen.CoffeeList.route) {
+                            popUpTo(Screen.Splash.route) { inclusive = true }
+                        }
+                    } else {
+                        navController.navigate(Screen.Auth.route) {
+                            popUpTo(Screen.Splash.route) { inclusive = true }
+                        }
                     }
                 },
             )
         }
+
+        composable(Screen.Auth.route) {
+            AuthScreen(
+                authDataSource = appContainer.authDataSource,
+                onSignInSuccess = {
+                    navController.navigate(Screen.CoffeeList.route) {
+                        popUpTo(Screen.Auth.route) { inclusive = true }
+                    }
+                },
+            )
+        }
+
         composable(Screen.CoffeeList.route) {
             val viewModel = remember {
                 CoffeeViewModel(appContainer.getCoffeeListUseCase)
             }
             CoffeeScreen(
                 viewModel = viewModel,
+                authViewModel = authViewModel,
                 onNavigate = { route ->
                     navController.navigate(route)
                 },
@@ -65,8 +103,18 @@ fun AppNavGraph(
                 onNavigateToCart = {
                     navController.navigate(Screen.Cart.route)
                 },
+                onNavigateToProfile = {
+                    navController.navigate(Screen.Profile.route)
+                },
+                onSignOut = {
+                    authViewModel.signOut()
+                    navController.navigate(Screen.Auth.route) {
+                        popUpTo(Screen.CoffeeList.route) { inclusive = true }
+                    }
+                },
             )
         }
+
         composable("${Screen.CoffeeDetail.route}/{coffeeId}") { backStackEntry ->
             val coffeeId = backStackEntry.arguments?.getString("coffeeId")?.toIntOrNull()
 
@@ -95,6 +143,7 @@ fun AppNavGraph(
                 },
             )
         }
+
         composable(Screen.Cart.route) {
             CoffeeCartScreen(
                 viewModel = cartViewModel,
@@ -103,9 +152,18 @@ fun AppNavGraph(
                 },
             )
         }
+
         composable(Screen.Settings.route) {
-            CoffeeSettingScreen()
+            CoffeeSettingScreen(
+                authViewModel = authViewModel,
+                onSignOut = {
+                    navController.navigate(Screen.Auth.route) {
+                        popUpTo(Screen.Settings.route) { inclusive = true }
+                    }
+                },
+            )
         }
+
         composable(Screen.Premium.route) {
             PremiumPurchaseScreen(
                 billingManager = appContainer.billingManager,
@@ -114,6 +172,21 @@ fun AppNavGraph(
                 },
                 onClose = {
                     navController.navigateUp()
+                },
+            )
+        }
+
+        composable(Screen.Profile.route) {
+            ProfileScreen(
+                authViewModel = authViewModel,
+                onNavigateBack = {
+                    navController.navigateUp()
+                },
+                onSignOut = {
+                    authViewModel.signOut()
+                    navController.navigate(Screen.Auth.route) {
+                        popUpTo(Screen.Profile.route) { inclusive = true }
+                    }
                 },
             )
         }
